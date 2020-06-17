@@ -30,12 +30,12 @@ class _MainPageState extends State<MainPage> {
   // ];
 
   // static const double heading_size = 20;
-  static List<String> headings = [
-    "College Feed",
-    "Explore Feed",
-    "Fam Feed",
-    "User"
-  ];
+  // static List<String> headings = [
+  //   "College Feed",
+  //   "Explore Feed",
+  //   "Fam Feed",
+  //   "User"
+  // ];
   // NavBar nav = NavBar(headings[0]);
   List<Widget> pages = [
     Text("A"),

@@ -8,17 +8,18 @@ class LoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlineButton(
+    return RaisedButton(
       onPressed: clickResultFunction,
       child: Text(
         loginText,
         style: TextStyle(),
       ),
-      borderSide: BorderSide(
-        width: 1.5,
-      ),
-      highlightedBorderColor: Colors.tealAccent,
-      splashColor: Colors.teal,
+      // borderSide: BorderSide(
+      //   width: 1.5,
+      // ),
+      // highlightedBorderColor: Colors.tealAccent,
+      splashColor: Colors.tealAccent,
+      color: Colors.teal,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
     );
   }

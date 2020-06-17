@@ -23,7 +23,7 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
             color: Colors.white,
           ),
           onPressed: () {
-            // TODO: Auth Management
+            // TODO: Auth Management for signout
             Navigator.pop(context);
           },
         ),

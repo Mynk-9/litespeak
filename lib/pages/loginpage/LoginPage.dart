@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import './LoginField.dart';
 import './LoginButton.dart';
@@ -32,6 +33,29 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
         });
       },
     );
+  }
+
+  // The segment is modification of code from firebase_auth package doc
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  Future<FirebaseUser> _handleSignIn() async {
+    try {
+      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.getCredential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final FirebaseUser user =
+          (await _auth.signInWithCredential(credential)).user;
+      print("signed in " + user.displayName);
+      return user;
+    } catch (e) {
+      return null;
+    }
   }
 
   TabController _controller;
@@ -78,7 +102,9 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Expanded(
-              flex: _keyboardState ? 2 : 4, // flex value 4 when no keyboard otherwise 2
+              flex: _keyboardState
+                  ? 2
+                  : 4, // flex value 4 when no keyboard otherwise 2
               child: Center(
                 child: LiteSpeakTitle(45.0, isAnimated: true),
               ),
@@ -128,22 +154,23 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
                             children: <Widget>[
                               LoginButton(
                                 () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => MainPage(),
-                                    ),
-                                  );
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) => MainPage(),
+                                  //   ),
+                                  // );
+                                  _handleSignIn();
                                 },
                               ),
                               LoginButton(
                                 () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => MainPage(),
-                                    ),
-                                  );
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) => MainPage(),
+                                  //   ),
+                                  // );
                                 },
                                 loginText: "Login via Google",
                               ),
@@ -162,12 +189,12 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
                           SizedBox(height: 30),
                           LoginButton(
                             () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MainPage(),
-                                ),
-                              );
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) => MainPage(),
+                              //   ),
+                              // );
                             },
                             loginText: "Next",
                           ),
