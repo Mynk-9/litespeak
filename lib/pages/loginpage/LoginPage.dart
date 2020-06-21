@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/services.dart';
 
 import './LoginField.dart';
 import './LoginButton.dart';
 import '../../components/LiteSpeakTitle.dart';
-import './../mainpage/MainPage.dart';
 
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 
@@ -28,6 +27,7 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
 
     _keyboardVisibilitySubscriberId = _keyboardVisibility.addNewListener(
       onChange: (bool visible) {
+        print("keyboard state changed: " + _keyboardState.toString());
         setState(() {
           _keyboardState = visible;
         });
@@ -36,26 +36,40 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
   }
 
   // The segment is modification of code from firebase_auth package doc
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  // final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  Future<FirebaseUser> _handleSignIn() async {
+  String firebaseAuthError = "";
+
+  Future<FirebaseUser> _handleSignupUser(String email, String password) async {
+    AuthResult result;
     try {
-      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      final AuthCredential credential = GoogleAuthProvider.getCredential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final FirebaseUser user =
-          (await _auth.signInWithCredential(credential)).user;
-      print("signed in " + user.displayName);
-      return user;
+      await _auth
+          .createUserWithEmailAndPassword(email: email, password: password)
+          .then((res) => result = res);
     } catch (e) {
-      return null;
+      if (e is PlatformException) {
+        firebaseAuthError = e.message.toString();
+        throw e;
+      }
     }
+
+    return result.user;
+  }
+
+  Future<FirebaseUser> _handleEmailSignIn(String email, String password) async {
+    FirebaseUser user;
+    try {
+      await _auth
+          .signInWithEmailAndPassword(email: email, password: password)
+          .then((auth) => user = auth.user)
+          .catchError((onError) => throw onError);
+    } catch (e) {
+      if (e is PlatformException) {
+        firebaseAuthError = e.message.toString();
+        throw e;
+      }
+    }
+    return user;
   }
 
   TabController _controller;
@@ -86,10 +100,36 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
     isPasswordField: true,
     useDefaultLabelColor: false,
   );
-  LoginField signupField = LoginField(
-    "BITS Mail",
-    useDefaultLabelColor: false,
-  );
+  final List<String> emailDomains = ["@goa.bits-pilani.ac.in"];
+  int emailDomainsIndex = 0;
+
+  // code picked up from api.flutter.dev
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error!'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(firebaseAuthError),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,10 +153,12 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
             Container(
               child: TabBar(
                 controller: _controller,
-                unselectedLabelColor: Colors.tealAccent,
+                // unselectedLabelColor: Colors.tealAccent,
+                unselectedLabelColor: Theme.of(context).accentColor,
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicator: BoxDecoration(
-                  color: Colors.teal,
+                  // color: Colors.teal,
+                  color: Theme.of(context).buttonColor,
                   // shape: BoxShape.circle,
                   borderRadius: BorderRadius.circular(50),
                 ),
@@ -145,7 +187,16 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
                       padding: EdgeInsets.fromLTRB(10, 40, 10, 0),
                       child: Column(
                         children: <Widget>[
-                          username,
+                          Row(
+                            children: <Widget>[
+                              Expanded(child: username),
+                              Expanded(
+                                child: Center(
+                                  child: Text(emailDomains[emailDomainsIndex]),
+                                ),
+                              ),
+                            ],
+                          ),
                           SizedBox(height: 30),
                           password,
                           SizedBox(height: 30),
@@ -153,26 +204,28 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: <Widget>[
                               LoginButton(
-                                () {
+                                () async {
                                   // Navigator.push(
                                   //   context,
                                   //   MaterialPageRoute(
                                   //     builder: (context) => MainPage(),
                                   //   ),
                                   // );
-                                  _handleSignIn();
+                                  String _email = username.controller.text +
+                                      emailDomains[emailDomainsIndex];
+                                  String _password = password.controller.text;
+                                  bool success = true;
+                                  await _handleEmailSignIn(_email, _password)
+                                      .catchError((e) {
+                                    print('Error caught at signin: ' +
+                                        e.toString());
+                                    success = false;
+                                    _showMyDialog();
+                                  });
+                                  return success;
                                 },
-                              ),
-                              LoginButton(
-                                () {
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder: (context) => MainPage(),
-                                  //   ),
-                                  // );
-                                },
-                                loginText: "Login via Google",
+                                processCompletionMessage:
+                                    "Signed in successfully!",
                               ),
                             ],
                           ),
@@ -185,18 +238,36 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
                       padding: EdgeInsets.fromLTRB(10, 40, 10, 0),
                       child: Column(
                         children: <Widget>[
-                          signupField,
+                          Row(
+                            children: <Widget>[
+                              Expanded(child: username),
+                              Expanded(
+                                child: Center(
+                                  child: Text(emailDomains[emailDomainsIndex]),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 30),
+                          password,
                           SizedBox(height: 30),
                           LoginButton(
-                            () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) => MainPage(),
-                              //   ),
-                              // );
+                            () async {
+                              String _email = username.controller.text +
+                                  emailDomains[emailDomainsIndex];
+                              String _password = password.controller.text;
+                              bool success = true;
+                              await _handleSignupUser(_email, _password)
+                                  .catchError((e) {
+                                print(
+                                    'Error caught at signup: ' + e.toString());
+                                success = false;
+                                _showMyDialog();
+                              });
+                              return success;
                             },
-                            loginText: "Next",
+                            loginText: "Signup",
+                            processCompletionMessage: "Signed up successfully!",
                           ),
                         ],
                       ),

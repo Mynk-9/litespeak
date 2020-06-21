@@ -27,7 +27,6 @@ class _LiteSpeakTitleState extends State<LiteSpeakTitle> {
     headingFontList = [
       GoogleFonts.pacifico(
         textStyle: TextStyle(
-          // color: Colors.cyan,
           fontSize: headingFontSize,
         ),
       ),

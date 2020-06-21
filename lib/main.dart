@@ -26,7 +26,16 @@ class MyApp extends StatelessWidget {
       },
       child: MaterialApp(
         title: 'LiteSpeak',
-        theme: isDark ? ThemeData.dark() : ThemeData.light(),
+        // theme: isDark ? ThemeData.dark() : ThemeData.light(),
+        theme: isDark
+            ? ThemeData(
+                brightness: Brightness.dark,
+                primarySwatch: Colors.teal,
+              )
+            : ThemeData(
+                brightness: Brightness.light,
+                primarySwatch: Colors.cyan,
+              ),
         home: LoginPage(),
       ),
     );
