@@ -1,4 +1,7 @@
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import './../mainpage/MainPageNew.dart';
 
 class LoginButton extends StatefulWidget {
   final Future<bool> Function() clickResultFunction;
@@ -55,23 +58,36 @@ class _LoginButtonState extends State<LoginButton> {
   @override
   Widget build(BuildContext context) {
     return RaisedButton(
-      onPressed: () async { 
-        // bool result;
+      onPressed: () async {
+        bool success;
         toggleProcessingState();
         await clickResultFunction().then((result) {
           if (result == true) {
-            // success
+            // successful
             toggleProcessingState();
             setProcessMessage(success: true);
+            success = result;
           } else {
             toggleProcessingState();
             setProcessMessage(success: false);
+            success = result;
           }
         }).catchError((e) => print("Error at signup -- " + e.toString()));
         autoResetter();
+
+        if (success) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MainPage(),
+            ),
+          );
+        }
       },
       child: _processing
-          ? Transform.scale(scale: 0.5, child: CircularProgressIndicator())
+          ? Transform.scale(scale: 0.5, child: CircularProgressIndicator(
+            backgroundColor: Colors.white,
+          ))
           : Text(
               _buttonText == null ? loginText : _buttonText,
               style: TextStyle(),

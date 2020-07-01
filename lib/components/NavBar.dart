@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import './LiteSpeakTitle.dart';
 
@@ -23,7 +24,7 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
             color: Colors.white,
           ),
           onPressed: () {
-            // TODO: Auth Management for signout
+            FirebaseAuth.instance.signOut();
             Navigator.pop(context);
           },
         ),

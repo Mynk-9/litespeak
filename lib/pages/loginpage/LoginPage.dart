@@ -93,12 +93,12 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
     onSaved: (value) {
       value = value.trim();
     },
-    useDefaultLabelColor: false,
+    // useDefaultLabelColor: false,
   );
   LoginField password = LoginField(
     "Password",
     isPasswordField: true,
-    useDefaultLabelColor: false,
+    // useDefaultLabelColor: false,
   );
   final List<String> emailDomains = ["@goa.bits-pilani.ac.in"];
   int emailDomainsIndex = 0;
@@ -120,12 +120,17 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
           ),
           actions: <Widget>[
             FlatButton(
-              child: Text('Ok'),
+              child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
           ],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(20.0),
+            ),
+          ),
         );
       },
     );
@@ -153,11 +158,9 @@ class _LoginPage extends State<LoginPage> with SingleTickerProviderStateMixin {
             Container(
               child: TabBar(
                 controller: _controller,
-                // unselectedLabelColor: Colors.tealAccent,
                 unselectedLabelColor: Theme.of(context).accentColor,
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicator: BoxDecoration(
-                  // color: Colors.teal,
                   color: Theme.of(context).buttonColor,
                   // shape: BoxShape.circle,
                   borderRadius: BorderRadius.circular(50),

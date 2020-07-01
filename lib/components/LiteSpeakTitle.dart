@@ -54,7 +54,12 @@ class _LiteSpeakTitleState extends State<LiteSpeakTitle> {
   @override
   Widget build(BuildContext context) {
     return AnimatedDefaultTextStyle(
-      child: Text(data),
+      child: Text(
+        data,
+        style: TextStyle(
+          color: Theme.of(context).textTheme.bodyText1.color,
+        ),
+      ),
       style: headingFontList[fontIterator],
       duration:
           Duration(milliseconds: (animationDurationMilliseconds ~/ 2).toInt()),
